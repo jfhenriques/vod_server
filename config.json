@@ -1,0 +1,14 @@
+{
+	"servers": [
+		{
+			"name": "Server 1",
+			"ip": "127.0.0.1",
+			"inf": "eth0"
+		},
+		{
+			"name": "Server 2",
+			"ip": "127.0.0.1",
+			"inf": "eth0"
+		}
+	]
+}
