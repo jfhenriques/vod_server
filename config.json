@@ -1,14 +1,15 @@
 {
+	"updateInterval": 5,
+	"ifaceTimeout": 4,
+
 	"servers": [
 		{
 			"name": "Server 1",
-			"ip": "127.0.0.1",
-			"inf": "eth0"
-		},
-		{
-			"name": "Server 2",
-			"ip": "127.0.0.1",
-			"inf": "eth0"
+			"host": "192.168.1.10",
+			"community": "secret",
+			"port": 161,
+			"iface": "eth0",
+			"ifaceRateMbits": 100
 		}
 	]
 }

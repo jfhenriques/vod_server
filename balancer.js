@@ -12,6 +12,8 @@ var snmp = require('snmp-native'),
 	loadWait = 0;
 	loadFinish = 0;
 
+const CHECK_INTERVAL = 1000 ;
+
 
 
 app.configure(function() {
@@ -68,6 +70,14 @@ function resJSON(req, res, out, statusCode) {
 	res.end();
 }
 
+var timerFunc = function()
+{
+	for(var i = 0; i < serverList.length; i++)
+		serverList[i].checkUpdate();
+	
+	setTimeout(timerFunc, CHECK_INTERVAL);
+}
+
 
 function loadServers()
 {
@@ -75,23 +85,29 @@ function loadServers()
 		&& config.servers
 		&& config.servers.length > 0 )
 	{
+		if( config.updateInterval )
+			Server.setUpdateInterval( config.updateInterval );
+
+		Server.setIfaceTimeout( config.ifaceTimeout );
 		
 		config.servers.forEach(function(entry) {
 
 			var server = Server.deserialize(entry) ;
 
-			if( server.isValid() )
-			{
-				loadWait++;
+			loadWait++;
 
-				server.createConnection(function(err){
+			server.createSession(function(err) {
 
-					loadFinish++;
+				loadFinish++;
 
-					if( !err )
-						serverList.push( server );
-				});
-			}
+				//console.log(server);
+
+				if( !err )
+					serverList.push( server );
+
+				if( loadWait == loadFinish )
+					process.nextTick(timerFunc);
+			});
 		});
 	}
 }
