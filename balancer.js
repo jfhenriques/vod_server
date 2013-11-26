@@ -98,7 +98,11 @@ function loadServers()
 				loadFinish++;
 
 				if( !err )
+				{
+					Server.changePriorityList( server, 0 );
+
 					serverList.push( server );
+				}
 
 				if( loadWait == loadFinish )
 					process.nextTick(timerFunc);
@@ -118,20 +122,46 @@ app.get('/test', function (req, res) {
 app.get('/request', function (req, res) {
 
 	var min = Infinity,
-		minIndex = 0;
+		srv = undefined,
 
-	for(var i = 0; i < serverList.length; i++ )
+		i,j,pList,
+
+		srvOpt,
+		srvName = undefined,
+		srvHost = undefined;
+
+	for( i = 0; i < Server.getPriorityListSize(); i++ )
 	{
-		if( serverList[i].metric < min )
+		pList = Server.getPriorityList(i);
+
+		for( j = 0; j < pList.length; j++ )
 		{
-			min = serverList[i].metric;
-			minIndex = i;
+			if( pList[j].metric < min )
+			{
+				min = pList[j].metric;
+				srv = pList[j] ;
+
+				break;
+			}
 		}
+
+		if( srv !== undefined )
+			break;
 	}
 
-	var srvOpt = serverList[minIndex].options || {};
+	if( srv !== undefined )
+	{
+		srvOpt = srv.options || {} ;
 
-	resJSON(req, res, {state: "ok", serverName: srvOpt.name, serverHost: srvOpt.publicHost }, 200);
+		srvName = srvOpt.name;
+		srvHost = srvOpt.publicHost;
+
+		i = 1 + srv.priority ;
+
+		Server.changePriorityList(srv, i);
+	}
+
+	resJSON(req, res, {state: "ok", serverName: srvName, serverHost: srvHost }, 200);
 });
 
 
