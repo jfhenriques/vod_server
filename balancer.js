@@ -85,10 +85,7 @@ function loadServers()
 		&& config.servers
 		&& config.servers.length > 0 )
 	{
-		if( config.updateInterval )
-			Server.setUpdateInterval( config.updateInterval );
-
-		Server.setIfaceTimeout( config.ifaceTimeout );
+		Server.initialize( config );
 		
 		config.servers.forEach(function(entry) {
 
@@ -99,8 +96,6 @@ function loadServers()
 			server.createSession(function(err) {
 
 				loadFinish++;
-
-				//console.log(server);
 
 				if( !err )
 					serverList.push( server );
@@ -119,6 +114,26 @@ app.get('/test', function (req, res) {
 
 	resJSON(req, res, {state: "ok"}, 200);
 });
+
+app.get('/request', function (req, res) {
+
+	var min = Infinity,
+		minIndex = 0;
+
+	for(var i = 0; i < serverList.length; i++ )
+	{
+		if( serverList[i].metric < min )
+		{
+			min = serverList[i].metric;
+			minIndex = i;
+		}
+	}
+
+	var srvOpt = serverList[minIndex].options || {};
+
+	resJSON(req, res, {state: "ok", serverName: srvOpt.name, serverHost: srvOpt.publicHost }, 200);
+});
+
 
 
 

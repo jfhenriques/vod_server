@@ -1,11 +1,27 @@
 {
-	"updateInterval": 5,
-	"ifaceTimeout": 4,
+	"updateInterval": 3,
+	"ifaceTimeout": 2,
+
+	"metricTimeframe": 30,
+	"metricLastSecs": 10,
+	"metricLastSecsWeight": 0.7,
+
+	"debug": false,
 
 	"servers": [
 		{
 			"name": "Server 1",
 			"host": "192.168.1.10",
+			"publicHost": "192.168.1.10",
+			"community": "secret",
+			"port": 161,
+			"iface": "eth0",
+			"ifaceRateMbits": 100
+		},
+		{
+			"name": "Server 2",
+			"host": "192.168.1.10",
+			"publicHost": "192.168.1.10",
 			"community": "secret",
 			"port": 161,
 			"iface": "eth0",
