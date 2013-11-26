@@ -1,7 +1,7 @@
 
 var snmp = require('snmp-native'),
 	Server = require('./lib/server'),
-	config = require('./config.json'),
+	config = require('./config.json') || {},
 
 	express = require('express'),
 	app = express(),
@@ -81,12 +81,11 @@ var timerFunc = function()
 
 function loadServers()
 {
-	if(    config
-		&& config.servers
+	Server.initialize( config );
+	
+	if(    config.servers
 		&& config.servers.length > 0 )
 	{
-		Server.initialize( config );
-		
 		config.servers.forEach(function(entry) {
 
 			var server = Server.deserialize(entry) ;
@@ -99,7 +98,8 @@ function loadServers()
 
 				if( !err )
 				{
-					Server.changePriorityList( server, 0 );
+					if( config.priorityLists )
+						Server.changePriorityList( server, 0 );
 
 					serverList.push( server );
 				}
@@ -130,23 +130,39 @@ app.get('/request', function (req, res) {
 		srvName = undefined,
 		srvHost = undefined;
 
-	for( i = 0; i < Server.getPriorityListSize(); i++ )
+	if( config.priorityLists )
 	{
-		pList = Server.getPriorityList(i);
-
-		for( j = 0; j < pList.length; j++ )
+		for( i = 0; i < Server.getPriorityListSize(); i++ )
 		{
-			if( pList[j].metric < min )
-			{
-				min = pList[j].metric;
-				srv = pList[j] ;
+			pList = Server.getPriorityList(i);
 
+			for( j = 0; j < pList.length; j++ )
+			{
+				if( pList[j].metric < min )
+				{
+					min = pList[j].metric;
+					srv = pList[j] ;
+
+					break;
+				}
+			}
+
+			if( srv !== undefined )
 				break;
+		}
+
+	}
+	else
+	{
+		for( i = 0; i < serverList.length; i++ )
+		{
+			if( serverList[i].metric < min )
+			{
+				min = serverList[i].metric;
+				srv = serverList[i] ;
 			}
 		}
 
-		if( srv !== undefined )
-			break;
 	}
 
 	if( srv !== undefined )
@@ -156,9 +172,12 @@ app.get('/request', function (req, res) {
 		srvName = srvOpt.name;
 		srvHost = srvOpt.publicHost;
 
-		i = 1 + srv.priority ;
+		if( config.priorityLists )
+		{
+			i = 1 + srv.priority ;
 
-		Server.changePriorityList(srv, i);
+			Server.changePriorityList(srv, i);
+		}
 	}
 
 	resJSON(req, res, {state: "ok", serverName: srvName, serverHost: srvHost }, 200);
@@ -189,23 +208,3 @@ parsePort();
 
 console.log("Listening on port: " + port );
 app.listen(port);
-
-
-// // Create a Session with explicit default host, port, and community.
-// var session = new snmp.Session({ host: '192.168.1.10', community: 'public' })
-
-// console.log("started session");
-// console.log(session);
-
-
-// //.1.3.6.1.2.1.1
-// //var oids = [  ];
-// session.getSubtree({ oid: [1, 3, 6, 1, 2, 1] }, function (error, varbinds) {
-
-//  console.log(error);
-//  console.log(varbinds);
-
-//     varbinds.forEach(function (vb) {
-//         console.log(vb.oid + ' = ' + vb.value + ' (' + vb.type + ')');
-//     });
-// });

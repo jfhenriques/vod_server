@@ -6,6 +6,8 @@
 	"metricLastSecs": 10,
 	"metricLastSecsWeight": 0.7,
 
+	"priorityLists": false,
+
 	"debug": false,
 
 	"servers": [
