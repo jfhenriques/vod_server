@@ -88,25 +88,30 @@ function loadServers()
 	{
 		config.servers.forEach(function(entry) {
 
-			var server = Server.deserialize(entry) ;
+			if(    entry
+				&& entry.enabled == undefined
+				|| entry.enabled )
+			{
+				var server = Server.deserialize(entry) ;
 
-			loadWait++;
+				loadWait++;
 
-			server.createSession(function(err) {
+				server.createSession(function(err) {
 
-				loadFinish++;
+					loadFinish++;
 
-				if( !err )
-				{
-					if( config.priorityLists )
-						Server.changePriorityList( server, 0 );
+					if( !err )
+					{
+						if( config.priorityLists )
+							Server.changePriorityList( server, 0 );
 
-					serverList.push( server );
-				}
+						serverList.push( server );
+					}
 
-				if( loadWait == loadFinish )
-					process.nextTick(timerFunc);
-			});
+					if( loadWait == loadFinish )
+						process.nextTick(timerFunc);
+				});
+			}
 		});
 	}
 }

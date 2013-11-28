@@ -1,30 +1,49 @@
 {
-	"updateInterval": 5,
+	"updateInterval": 3,
 	"ifaceTimeout": 2,
 
 	"metricTimeframe": 30,
 	"metricLastSecs": 10,
 	"metricLastSecsWeight": 0.7,
 
-	"priorityLists": false,
+	"priorityLists": true,
 
 	"debug": false,
 
 	"servers": [
 		{
+			"enabled": false,
 			"name": "Server 1",
-			"host": "192.168.1.10",
-			"publicHost": "192.168.1.10",
-			"community": "secret",
+			"host": "172.16.1.11",
+			"publicHost": "172.16.1.11",
+			"community": "com28481898527262025229",
 			"port": 161,
 			"iface": "eth0",
 			"ifaceRateMbits": 100
 		},
 		{
 			"name": "Server 2",
-			"host": "192.168.1.10",
-			"publicHost": "192.168.1.10",
-			"community": "secret",
+			"host": "172.16.1.12",
+			"publicHost": "172.16.1.12",
+			"community": "com28481898527262025229",
+			"port": 161,
+			"iface": "eth0",
+			"ifaceRateMbits": 100
+		},
+		{
+			"name": "Server 3",
+			"host": "172.16.1.13",
+			"publicHost": "172.16.1.13",
+			"community": "com28481898527262025229",
+			"port": 161,
+			"iface": "eth0",
+			"ifaceRateMbits": 100
+		},
+		{
+			"name": "Server 4",
+			"host": "172.16.1.14",
+			"publicHost": "172.16.1.14",
+			"community": "com28481898527262025229",
 			"port": 161,
 			"iface": "eth0",
 			"ifaceRateMbits": 100
