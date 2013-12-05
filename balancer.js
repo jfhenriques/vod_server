@@ -1,7 +1,8 @@
 
 var snmp = require('snmp-native'),
 	Server = require('./lib/server'),
-	config = require('./config.json') || {},
+	config = require('./config.3.json') || {},
+	utils = require('./lib/utils'),
 
 	express = require('express'),
 	app = express(),
@@ -9,6 +10,7 @@ var snmp = require('snmp-native'),
 	port = 8080,
 
 	serverList = [],
+	serverListQueue = [],
 	loadWait = 0;
 	loadFinish = 0;
 
@@ -82,6 +84,7 @@ var timerFunc = function()
 function loadServers()
 {
 	Server.initialize( config );
+
 	
 	if(    config.servers
 		&& config.servers.length > 0 )
@@ -89,8 +92,8 @@ function loadServers()
 		config.servers.forEach(function(entry) {
 
 			if(    entry
-				&& entry.enabled == undefined
-				|| entry.enabled )
+				&& (    entry.enabled == undefined
+					 || entry.enabled ) )
 			{
 				var server = Server.deserialize(entry) ;
 
@@ -102,14 +105,17 @@ function loadServers()
 
 					if( !err )
 					{
-						if( config.priorityLists )
-							Server.changePriorityList( server, 0 );
+						// if( config.priorityLists )
+						// 	Server.changePriorityList( server, 0 );
 
-						serverList.push( server );
+						// // if( serverList.length == 0 )
+						// // 	serverList.push( server );
+						// // else
+							serverListQueue.push( server );
 					}
 
-					if( loadWait == loadFinish )
-						process.nextTick(timerFunc);
+					//if( loadWait == loadFinish )
+					process.nextTick(timerFunc);
 				});
 			}
 		});
@@ -126,14 +132,36 @@ app.get('/test', function (req, res) {
 
 app.get('/request', function (req, res) {
 
-	var min = Infinity,
-		srv = undefined,
+	var srv = undefined,
 
-		i,j,pList,
+		i,pList,
 
 		srvOpt,
 		srvName = undefined,
-		srvHost = undefined;
+		srvHost = undefined,
+
+		updatePriority = true;
+
+
+	var _pick_server_fron_list = function(list)
+	{
+		var min = Infinity,
+			_srv = undefined;
+
+		for( var j = 0; j < list.length; j++ )
+		{
+			if(    list[j].canUse()
+				&& list[j].metric < min )
+			{
+				min = list[j].metric;
+				_srv = list[j] ;
+			}
+		}
+
+		return _srv;
+	}
+
+
 
 	if( config.priorityLists )
 	{
@@ -141,34 +169,35 @@ app.get('/request', function (req, res) {
 		{
 			pList = Server.getPriorityList(i);
 
-			for( j = 0; j < pList.length; j++ )
+			if( pList.length > 0 )
 			{
-				if( pList[j].metric < min )
-				{
-					min = pList[j].metric;
-					srv = pList[j] ;
+				srv =_pick_server_fron_list( pList );
 
+				if( srv !== undefined )
 					break;
-				}
 			}
-
-			if( srv !== undefined )
-				break;
 		}
-
 	}
 	else
-	{
-		for( i = 0; i < serverList.length; i++ )
-		{
-			if( serverList[i].metric < min )
-			{
-				min = serverList[i].metric;
-				srv = serverList[i] ;
-			}
-		}
+		srv =_pick_server_fron_list( serverList );
 
+
+	if(    srv == undefined
+		&& serverListQueue.length > 0 )
+	{
+		srv = serverListQueue[0];
+
+		serverListQueue.splice(0, 1);
+
+		serverList.push( srv );
+
+		if( config.priorityLists )
+		{
+			updatePriority = false;
+			Server.changePriorityList(srv, 1);
+		}
 	}
+
 
 	if( srv !== undefined )
 	{
@@ -177,15 +206,18 @@ app.get('/request', function (req, res) {
 		srvName = srvOpt.name;
 		srvHost = srvOpt.publicHost;
 
-		if( config.priorityLists )
+		if(    config.priorityLists
+			&& updatePriority )
 		{
 			i = 1 + srv.priority ;
 
 			Server.changePriorityList(srv, i);
 		}
-	}
 
-	resJSON(req, res, {state: "ok", serverName: srvName, serverHost: srvHost }, 200);
+		resJSON(req, res, {state: "ok", code: 0, serverName: srvName, serverHost: srvHost }, 200);
+	}
+	else
+		resJSON(req, res, {state: "No Server available", code: 1 }, 200);
 });
 
 
