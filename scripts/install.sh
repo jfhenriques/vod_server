@@ -5,7 +5,7 @@
 #host="http://joao.algumavez.com/vod/"
 
 
-host="http://192.168.1.112/vod/"
+host="http://172.16.1.130/vod/"
 tmpdir="/tmp/vod_install.$$/"
 
 D_SNMPD_CONF="${host}snmpd.conf"
@@ -18,7 +18,7 @@ D_BTSYNC_CONF="${host}btsync.conf"
 T_BTSYNC_CONF="${tmpdir}btsync.conf"
 I_BTSYNC_CONF="/etc/btsync/btsync.conf"
 BTSYNC_SERVICE="/etc/init.d/btsync"
-BTSYNC_SHARE_FOLDER="/var/www/video/vod"
+BTSYNC_SHARE_FOLDER="/var/www/media"
 BTSYNC_LISTEN_PORT=8123
 
 
@@ -57,7 +57,7 @@ HOSTNAME=$(hostname)
 			varname="HOST_${i}"
 			
 			ifconfig eth1 down
-			ifconfig eth1 "${!varname}" netmask 255.255.255.0
+			ifconfig eth1 "${!varname}" netmask 255.0.0.0
 		
 			break
 		fi
@@ -141,34 +141,36 @@ HOSTNAME=$(hostname)
 	
 	echo "Just a test file" > "${BTSYNC_SHARE_FOLDER}/test_file"
 	
-	HOST_LIST=""
-	HOST_COUNT=0
+#	HOST_LIST=""
+#	HOST_COUNT=0
 	
-	for (( i = 1 ; i <= $TOTAL_HOSTS ; i++ )); do
-	
-		if [ "$1" != "$i" ]; then
-		
-			if [ $HOST_COUNT -gt 0 ]; then
-				HOST_LIST="${HOST_LIST},"
-			fi
-			
-			varname="HOST_${i}"
-			HOST_LIST="${HOST_LIST}\n\t\"${!varname}:${BTSYNC_LISTEN_PORT}\""
-			
-			((HOST_COUNT++))
-		fi
-	
-	done
+#	for (( i = 1 ; i <= $TOTAL_HOSTS ; i++ )); do	
+#		if [ "$1" != "$i" ]; then		
+#			if [ $HOST_COUNT -gt 0 ]; then
+#				HOST_LIST="${HOST_LIST},"
+#			fi			
+#			varname="HOST_${i}"
+#			HOST_LIST="${HOST_LIST}\n\t\"${!varname}:${BTSYNC_LISTEN_PORT}\""			
+#			((HOST_COUNT++))
+#		fi	
+#	done
 	
 	$BTSYNC_SERVICE stop 2>/dev/null
 	
 	rm -f /etc/btsync/debconf-default.conf 2>/dev/null
+	rm -rf /var/lib/btsync 2>/dev/null
 	
+#	cat "$T_BTSYNC_CONF" | sed \
+#		-e "s@##LISTEN_PORT##@${BTSYNC_LISTEN_PORT}@g" \
+#		-e "s@##MY_DEVICE_NAME##@${HOSTNAME}@g" \
+#		-e "s@##SINC_DIR_FOLDER##@${BTSYNC_SHARE_FOLDER}@g" \
+#		-e "s@##SINC_HOSTS##@${HOST_LIST}@g" \
+#		> "$I_BTSYNC_CONF"
+
 	cat "$T_BTSYNC_CONF" | sed \
 		-e "s@##LISTEN_PORT##@${BTSYNC_LISTEN_PORT}@g" \
 		-e "s@##MY_DEVICE_NAME##@${HOSTNAME}@g" \
 		-e "s@##SINC_DIR_FOLDER##@${BTSYNC_SHARE_FOLDER}@g" \
-		-e "s@##SINC_HOSTS##@${HOST_LIST}@g" \
 		> "$I_BTSYNC_CONF"
 	
 	$BTSYNC_SERVICE restart

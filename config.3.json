@@ -11,10 +11,11 @@
 	"debug": false,
 
 	"ifaceLimitRate": 0.8,
-	"clientDownloadMbits": 5,
+	"clientDownloadMbits": 10,
 
 	"servers": [
 		{
+			"enabled": true,
 			"name": "Server 1 (tux1)",
 			"host": "10.10.10.11",
 			"publicHost": "172.16.1.31:9000",
