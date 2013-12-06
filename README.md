@@ -20,37 +20,36 @@ Após extrair o conteúdo do zip para um directório, deve ser executado "npm in
 
 De seguida encontra a estrutura exemplo do ficheiro de configuração da aplicação:
 
-`
-{
-	"updateInterval": 3,
-	"ifaceTimeout": 2,
+	{
+		"updateInterval": 3,
+		"ifaceTimeout": 2,
 
-	"metricTimeframe": 30,
-	"metricLastSecs": 10,
-	"metricLastSecsWeight": 0.7,
+		"metricTimeframe": 30,
+		"metricLastSecs": 10,
+		"metricLastSecsWeight": 0.7,
 
-	"priorityLists": true,
+		"priorityLists": true,
 
-	"debug": false,
+		"debug": false,
 
-	"ifaceLimitRate": 0.8,
-	"clientDownloadMbits": 10,
+		"ifaceLimitRate": 0.8,
+		"clientDownloadMbits": 10,
 
-	"servers": [
-		{
-			"enabled": true,
-			"name": "Server 1 (tux1)",
-			"host": "10.10.10.11",
-			"publicHost": "172.16.1.31:9000",
-			"community": "com28481898527262025229",
-			"port": 161,
-			"iface": "eth0",
-			"ifaceRateMbits": 100
-		},
-		...
-	]
-}
-`
+		"servers": [
+			{
+				"enabled": true,
+				"name": "Server 1 (tux1)",
+				"host": "10.10.10.11",
+				"publicHost": "172.16.1.31:9000",
+				"community": "com28481898527262025229",
+				"port": 161,
+				"iface": "eth0",
+				"ifaceRateMbits": 100
+			},
+			...
+		]
+	}
+
 
 
 **updateInterval**: será a frequência do update através do snmp a cada servidor activo
@@ -74,14 +73,14 @@ De forma a suavizar os valores do TX das interfaces dos servidores, é mantido u
 **ifaceLimitRate**: valor máximo disponível (em percentagem compreendida entre 0.0 e 1.0) da interface de cada servidor, antes de considerar o mesmo como cheio. Estando o servidor cheio, e caso existam mais servidores em queue, será retirado o primeiro da queue e acrescentado à lista dos servidores activos, passando a estar disponível para responder a este e futuros pedidos. Deve ser SEMPRE	inferior a ~95%, caso contrário nunca será possível lançar novos servidores.
 
 **servers**: a lista de servidores disponíveis
-	**enabled**: true/false
-	**name**: nome simbólico, não tem qualquer importância a não ser para os logs da consola
-	**host**: ip privado, que estará à escuta para pedidos SNMP
-	**publicHost**: ip público, que deverá ser retornado como o endereço que os clientes se deverão conectar para receber o vídeo
-	**community**: comunidade do snmp (verificar scripts de configuração)
-	**port**: porta do snmo (por defeito 161)
-	**iface**: interface que deverá ser monitorizada no servidor (por defeiro eth0)
-	**ifaceRateMbits**: MegaBits da interface (10/100/1000)
+	* **enabled**: true/false
+	* **name**: nome simbólico, não tem qualquer importância a não ser para os logs da consola
+	* **host**: ip privado, que estará à escuta para pedidos SNMP
+	* **publicHost**: ip público, que deverá ser retornado como o endereço que os clientes se deverão conectar para receber o vídeo
+	* **community**: comunidade do snmp (verificar scripts de configuração)
+	* **port**: porta do snmo (por defeito 161)
+	* **iface**: interface que deverá ser monitorizada no servidor (por defeiro eth0)
+	* **ifaceRateMbits**: MegaBits da interface (10/100/1000)
 
 
 
